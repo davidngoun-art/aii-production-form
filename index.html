@@ -1,0 +1,417 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.fw{max-width:680px;margin:0 auto;padding:1.5rem 1rem;font-family:var(--font-sans);}
+.fh{background:#1a1a2e;border-radius:var(--border-radius-lg);padding:2rem 1.5rem;margin-bottom:1.25rem;text-align:center;}
+.fh-logo{font-size:28px;margin-bottom:8px;}
+.fh h1{color:#fff;font-size:19px;font-weight:500;margin-bottom:4px;}
+.fh p{color:#8899bb;font-size:12px;}
+.fh .school{color:#e94560;font-size:13px;font-weight:500;margin-bottom:6px;}
+.sc{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.sl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-secondary);margin-bottom:1rem;padding-bottom:8px;border-bottom:.5px solid var(--color-border-tertiary);}
+.fr{margin-bottom:1rem;}
+.fr:last-child{margin-bottom:0;}
+.fl{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px;display:block;}
+.req{color:#e94560;margin-left:2px;}
+.fr input,.fr select,.fr textarea{width:100%;font-size:14px;padding:8px 12px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);font-family:var(--font-sans);}
+.fr textarea{resize:vertical;min-height:72px;}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tc3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.team-intro{font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.6;padding:10px 12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);border-left:3px solid #e94560;}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.tcard{border:2px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem .875rem;cursor:pointer;transition:border-color .2s,background .15s;position:relative;text-align:center;user-select:none;}
+.tcard:hover{border-color:#e94560;background:var(--color-background-secondary);}
+.tcard.sel{border-color:#e94560;background:#fef0f3;}
+.av{width:68px;height:68px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500;}
+.av-d{background:#e6f1fb;color:#185fa5;}
+.av-s{background:#eeedfe;color:#534ab7;}
+.mn{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;}
+.mr{font-size:11px;color:var(--color-text-secondary);line-height:1.4;margin-bottom:6px;}
+.spec-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;display:inline-block;margin-bottom:6px;}
+.spec-d{background:#e6f1fb;color:#185fa5;}
+.spec-s{background:#eeedfe;color:#534ab7;}
+.covers{font-size:10px;color:var(--color-text-secondary);line-height:1.4;}
+.sk{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:6px;}
+.stag{font-size:10px;padding:2px 6px;border-radius:12px;font-weight:500;}
+.stag.bl{background:#e6f1fb;color:#185fa5;}
+.stag.pu{background:#eeedfe;color:#534ab7;}
+.stag.te{background:#e1f5ee;color:#0f6e56;}
+.stag.am{background:#faeeda;color:#854f0b;}
+.stag.pi{background:#fbeaf0;color:#993556;}
+.cbadge{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:#e94560;display:none;align-items:center;justify-content:center;}
+.tcard.sel .cbadge{display:flex;}
+.cbadge svg{width:11px;height:11px;stroke:#fff;stroke-width:2.5;fill:none;}
+.hint{font-size:12px;color:#e94560;text-align:center;min-height:18px;font-weight:500;}
+.nr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.nb{border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 6px;text-align:center;cursor:pointer;font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.nb .ni{font-size:18px;}
+.nb:hover{border-color:#e94560;color:var(--color-text-primary);}
+.nb.on{border-color:#e94560;background:#fef0f3;color:#e94560;}
+.rg{display:flex;gap:8px;flex-wrap:wrap;}
+.ro{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--color-text-primary);cursor:pointer;padding:6px 12px;border-radius:var(--border-radius-md);border:.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);transition:all .15s;}
+.ro:hover{border-color:#e94560;}
+.ro input{accent-color:#e94560;}
+.sub{width:100%;padding:14px;background:#e94560;color:#fff;border:none;border-radius:var(--border-radius-lg);font-size:15px;font-weight:500;cursor:pointer;margin-top:1rem;font-family:var(--font-sans);transition:opacity .15s;}
+.sub:hover{opacity:.9;}
+.hidden{display:none;}
+.show{display:block;}
+.upload-box{margin-top:8px;border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:14px;text-align:center;background:var(--color-background-secondary);cursor:pointer;}
+.upload-box input[type=file]{display:none;}
+.upload-label{font-size:12px;color:var(--color-text-secondary);cursor:pointer;display:block;}
+.upload-label span{color:#e94560;font-weight:500;}
+.upload-box input[type=text]{margin-top:8px;width:100%;}
+.info-note{font-size:11px;color:var(--color-text-secondary);margin-top:5px;padding:6px 10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);line-height:1.5;}
+</style>
+
+<div class="fw">
+  <div class="fh">
+    <div class="fh-logo">🎬</div>
+    <div class="school">Aii Language Center</div>
+    <h1>Video & Photo Production Request</h1>
+    <p>Fill in all required fields · Our team will confirm your booking</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="sc">
+    <div class="sl">Section 1 — Contact info</div>
+    <div class="tc">
+      <div class="fr">
+        <label class="fl">Full name <span class="req">*</span></label>
+        <input type="text" placeholder="e.g. Ms. Sokha Chan" />
+      </div>
+      <div class="fr">
+        <label class="fl">Campus / Building <span class="req">*</span></label>
+        <select id="campus-sel1" onchange="checkOther('campus-sel1','other-wrap1')">
+          <option value="">Select campus...</option>
+          <optgroup label="Mao Tse Tong Campus">
+            <option>Lim Kim Noy Tower, Mao Tse Tong Campus</option>
+            <option>Quach Leng Hoa Tower, Mao Tse Tong Campus</option>
+            <option>Mengly J. Quach Education Tower, Mao Tse Tong Campus</option>
+            <option>Villa 4 Building, Mao Tse Tong Campus</option>
+          </optgroup>
+          <optgroup label="Other Campuses">
+            <option>Toul Kork Campus</option>
+            <option>Chak Angre Campus</option>
+            <option>Choam Chao Campus</option>
+            <option>Phsar Thmey Campus</option>
+            <option>Chroy Chongva Campus</option>
+            <option>Siem Reap Campus</option>
+            <option>Takeo Campus</option>
+            <option>Sen Sok Campus</option>
+            <option>Chbar Ampov Campus</option>
+            <option>Chamkar Dong Campus</option>
+            <option>Tuol Sangke Campus</option>
+            <option value="other">Other</option>
+          </optgroup>
+        </select>
+        <div class="hidden" id="other-wrap1">
+          <input type="text" placeholder="Please describe your location..." style="margin-top:6px;" />
+        </div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="fr">
+        <label class="fl">Email <span class="req">*</span></label>
+        <input type="email" placeholder="teacher@aii.edu.kh" />
+      </div>
+      <div class="fr">
+        <label class="fl">Phone number</label>
+        <input type="text" placeholder="Optional" />
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="sc">
+    <div class="sl">Section 2 — Project info</div>
+    <div class="fr">
+      <label class="fl">Project title <span class="req">*</span></label>
+      <input type="text" placeholder="e.g. Year-End Award Ceremony 2026" />
+    </div>
+    <div class="tc">
+      <div class="fr">
+        <label class="fl">Type of project <span class="req">*</span></label>
+        <select id="proj-type" onchange="checkOtherType()">
+          <option value="">Choose type...</option>
+          <option>MJQ Contest</option>
+          <option>Interview</option>
+          <option>Promotional</option>
+          <option>Testimonial</option>
+          <option>Field Trip</option>
+          <option>Television Commercial</option>
+          <option>Documentary</option>
+          <option>YearBook</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="hidden" id="type-other-wrap">
+          <input type="text" placeholder="Please describe the project type..." style="margin-top:6px;" />
+        </div>
+      </div>
+      <div class="fr">
+        <label class="fl">Department <span class="req">*</span></label>
+        <select>
+          <option value="">Select department...</option>
+          <option>ESL</option>
+          <option>CSL</option>
+          <option>SOGO</option>
+          <option>Marketing</option>
+          <option>Academic</option>
+          <option>Administration</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Project description <span class="req">*</span></label>
+      <textarea placeholder="Describe what you need covered, any special requirements, key moments to capture..."></textarea>
+    </div>
+    <div class="fr">
+      <label class="fl">Script or storyboard</label>
+      <div class="info-note">If you have a script or storyboard ready, upload it or paste a link below. This helps our team prepare better.</div>
+      <div class="upload-box" style="margin-top:8px;">
+        <input type="file" id="script-file" accept=".pdf,.doc,.docx,.txt,.jpg,.png" />
+        <label class="upload-label" for="script-file">
+          <span>Click to upload a file</span> (PDF, Word, Image, TXT)
+        </label>
+      </div>
+      <input type="text" placeholder="Or paste a Google Drive / link here..." style="margin-top:8px;" />
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="sc">
+    <div class="sl">Section 3 — Shoot details</div>
+    <div class="fr">
+      <label class="fl">Shoot campus / building <span class="req">*</span></label>
+      <select id="campus-sel2" onchange="checkOther('campus-sel2','other-wrap2')">
+        <option value="">Select shoot location...</option>
+        <optgroup label="Mao Tse Tong Campus">
+          <option>Lim Kim Noy Tower, Mao Tse Tong Campus</option>
+          <option>Quach Leng Hoa Tower, Mao Tse Tong Campus</option>
+          <option>Mengly J. Quach Education Tower, Mao Tse Tong Campus</option>
+          <option>Villa 4 Building, Mao Tse Tong Campus</option>
+        </optgroup>
+        <optgroup label="Other Campuses">
+          <option>Toul Kork Campus</option>
+          <option>Chak Angre Campus</option>
+          <option>Choam Chao Campus</option>
+          <option>Phsar Thmey Campus</option>
+          <option>Chroy Chongva Campus</option>
+          <option>Siem Reap Campus</option>
+          <option>Takeo Campus</option>
+          <option>Sen Sok Campus</option>
+          <option>Chbar Ampov Campus</option>
+          <option>Chamkar Dong Campus</option>
+          <option>Tuol Sangke Campus</option>
+          <option value="other">Other (outside campus)</option>
+        </optgroup>
+      </select>
+      <div class="hidden" id="other-wrap2">
+        <input type="text" placeholder="Please describe the shoot location..." style="margin-top:6px;" />
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Exact room / floor / spot <span class="req">*</span></label>
+      <input type="text" placeholder="e.g. 3rd Floor Conference Room, Main Hall, Outdoor Stage..." />
+    </div>
+    <div class="tc">
+      <div class="fr">
+        <label class="fl">Start shoot date <span class="req">*</span></label>
+        <input type="date" />
+      </div>
+      <div class="fr">
+        <label class="fl">End shoot date</label>
+        <input type="date" />
+      </div>
+    </div>
+    <div class="tc">
+      <div class="fr">
+        <label class="fl">Start shoot time <span class="req">*</span></label>
+        <input type="text" placeholder="e.g. 08:30" />
+      </div>
+      <div class="fr">
+        <label class="fl">End shoot time</label>
+        <input type="text" placeholder="e.g. 11:00" />
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Number of people</label>
+      <input type="text" placeholder="Approx. count" />
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="sc">
+    <div class="sl">Section 4 — Choose your production team</div>
+    <div class="team-intro">
+      Tap a profile to select your preferred crew. You can choose one or both.
+      Both David and Sitha can handle all types of production — the specialization shown is just their primary strength.
+      Final assignment depends on availability.
+    </div>
+    <div class="tg">
+      <div class="tcard" id="card-david" onclick="toggleMember('david')">
+        <div class="cbadge"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <div class="av av-d">DN</div>
+        <div class="mn">David Ngoun</div>
+        <div class="mr">Cameraman &amp; Video Editor</div>
+        <div class="spec-tag spec-d">Specialist: Videography &amp; Video Editing</div>
+        <div class="covers">Also covers: Photography &amp; Photo Editing</div>
+        <div class="sk">
+          <span class="stag bl">Cinematography</span>
+          <span class="stag te">Video Editing</span>
+          <span class="stag am">Drone</span>
+          <span class="stag pi">Color Grading</span>
+        </div>
+      </div>
+      <div class="tcard" id="card-sitha" onclick="toggleMember('sitha')">
+        <div class="cbadge"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <div class="av av-s">SE</div>
+        <div class="mn">Sitha Eang</div>
+        <div class="mr">Senior Cameraman &amp; Video Editor Supervisor</div>
+        <div class="spec-tag spec-s">Specialist: Photography &amp; Photo Editing</div>
+        <div class="covers">Also covers: Videography &amp; Video Editing</div>
+        <div class="sk">
+          <span class="stag pu">Photography</span>
+          <span class="stag te">Photo Editing</span>
+          <span class="stag bl">Camera Op</span>
+          <span class="stag am">Lighting</span>
+          <span class="stag am">Drone</span>
+        </div>
+      </div>
+    </div>
+    <div class="hint" id="sel-hint">Tap a card to select your team</div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="sc">
+    <div class="sl">Section 5 — Production needs</div>
+    <div class="nr">
+      <div class="nb" id="n-audio" onclick="toggleNeed('audio')">
+        <span class="ni">🎙</span>Audio
+      </div>
+      <div class="nb" id="n-light" onclick="toggleNeed('light')">
+        <span class="ni">💡</span>Lighting
+      </div>
+      <div class="nb" id="n-drone" onclick="toggleNeed('drone')">
+        <span class="ni">🚁</span>Drone
+      </div>
+      <div class="nb" id="n-edit" onclick="toggleNeed('edit')">
+        <span class="ni">🎞</span>Editing
+      </div>
+      <div class="nb" id="n-angle" onclick="toggleNeed('angle')">
+        <span class="ni">📐</span>Multi-Angle
+      </div>
+    </div>
+    <div class="hidden" id="angle-note" style="margin-top:10px;">
+      <div class="fr" style="margin-bottom:0;">
+        <label class="fl">Describe the camera angles needed</label>
+        <textarea placeholder="e.g. Wide shot of stage, close-up of speaker, audience reaction shots..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="sc">
+    <div class="sl">Section 6 — Post production</div>
+    <div class="fr">
+      <label class="fl">Editing required? <span class="req">*</span></label>
+      <div class="rg">
+        <label class="ro"><input type="radio" name="editing" /> Yes</label>
+        <label class="ro"><input type="radio" name="editing" /> No</label>
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Subtitles needed?</label>
+      <div class="rg">
+        <label class="ro"><input type="radio" name="subs" value="yes" onclick="toggleSubs(true)" /> Yes</label>
+        <label class="ro"><input type="radio" name="subs" value="no" onclick="toggleSubs(false)" /> No</label>
+      </div>
+      <div class="hidden" id="subs-wrap" style="margin-top:10px;">
+        <div class="info-note" style="margin-bottom:8px;">Please provide your subtitle text file or a link to your subtitle content.</div>
+        <div class="upload-box">
+          <input type="file" id="subs-file" accept=".srt,.txt,.doc,.docx" />
+          <label class="upload-label" for="subs-file">
+            <span>Upload subtitle file</span> (.SRT, .TXT, Word)
+          </label>
+        </div>
+        <input type="text" placeholder="Or paste a Google Drive / link to subtitle content..." style="margin-top:8px;" />
+      </div>
+    </div>
+    <div class="fr">
+      <label class="fl">Delivery deadline <span class="req">*</span></label>
+      <input type="date" />
+    </div>
+    <div class="fr">
+      <label class="fl">Additional notes</label>
+      <textarea placeholder="Anything else we should know? Special requests, preferred output format, etc."></textarea>
+    </div>
+  </div>
+
+  <button class="sub" onclick="handleSubmit()">Submit Production Request</button>
+</div>
+
+<script>
+const sel={david:false,sitha:false};
+const needs={audio:false,light:false,drone:false,edit:false,angle:false};
+
+function toggleMember(id){
+  sel[id]=!sel[id];
+  document.getElementById('card-'+id).classList.toggle('sel',sel[id]);
+  const h=document.getElementById('sel-hint');
+  if(sel.david&&sel.sitha) h.textContent='David & Sitha both selected — full team!';
+  else if(sel.david) h.textContent='David Ngoun selected';
+  else if(sel.sitha) h.textContent='Sitha Eang selected';
+  else h.textContent='Tap a card to select your team';
+}
+
+function toggleNeed(id){
+  needs[id]=!needs[id];
+  document.getElementById('n-'+id).classList.toggle('on',needs[id]);
+  if(id==='angle'){
+    const n=document.getElementById('angle-note');
+    n.classList.toggle('hidden',!needs[id]);
+    n.classList.toggle('show',needs[id]);
+  }
+}
+
+function checkOther(selId,wrapId){
+  const v=document.getElementById(selId).value;
+  const w=document.getElementById(wrapId);
+  w.classList.toggle('hidden',v!=='other');
+  w.classList.toggle('show',v==='other');
+}
+
+function checkOtherType(){
+  const v=document.getElementById('proj-type').value;
+  const w=document.getElementById('type-other-wrap');
+  w.classList.toggle('hidden',v!=='other');
+  w.classList.toggle('show',v==='other');
+}
+
+function toggleSubs(show){
+  const w=document.getElementById('subs-wrap');
+  w.classList.toggle('hidden',!show);
+  w.classList.toggle('show',show);
+}
+
+function handleSubmit(){
+
+  const data = {
+    name: document.querySelector('input[type=text]').value,
+    email: document.querySelector('input[type=email]').value,
+    project: document.querySelectorAll('input[type=text]')[2].value,
+    date: document.querySelector('input[type=date]').value,
+    time: document.querySelectorAll('input[type=text]')[3].value,
+    location: document.querySelectorAll('input[type=text]')[4].value,
+    team: (sel.david ? 'David ' : '') + (sel.sitha ? 'Sitha' : '')
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbwOwJO3dugJ8R9HBBSAkbwDEmWaR7gFCNCfDGMOhd8Meu9PelvYzRIWfUqxs7LiAzXDqg/exec", {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(() => {
+    alert("Request submitted successfully!");
+  });
+}
