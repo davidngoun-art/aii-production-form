@@ -274,9 +274,8 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
         <label class="fl">Department <span class="req">*</span></label>
         <select id="f-dept">
           <option value="">Select department...</option>
-          <option>ESL</option><option>CSL</option><option>SOGO</option>
-          <option>Marketing</option><option>Academic</option>
-          <option>Administration</option><option>Other</option>
+          <option>ESL Program</option><option>CSL Program</option><option>SOGO</option>
+          <option>Marketing</option><option>Administration</option><option>Other</option>
         </select>
       </div>
     </div>
@@ -331,16 +330,27 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
           <input type="date" id="f-date-end"/>
         </div>
       </div>
-      <div class="tc">
-        <div class="fr">
-          <label class="fl">Start time <span class="req">*</span></label>
-          <input type="time" id="f-time-start"/>
-        </div>
-        <div class="fr">
-          <label class="fl">End time</label>
-          <input type="time" id="f-time-end"/>
+      <!-- TIME SLOTS -->
+      <div id="time-slots-container">
+        <div class="time-slot" id="slot-1">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:12px;font-weight:600;color:var(--blue);">🌅 Morning / Time Slot 1 <span style="color:#e94560;">*</span></span>
+          </div>
+          <div class="tc">
+            <div class="fr" style="margin-bottom:0">
+              <label class="fl">Start time <span class="req">*</span></label>
+              <input type="time" id="f-time-start"/>
+            </div>
+            <div class="fr" style="margin-bottom:0">
+              <label class="fl">End time</label>
+              <input type="time" id="f-time-end"/>
+            </div>
+          </div>
         </div>
       </div>
+      <button type="button" onclick="addTimeSlot()" id="add-slot-btn" style="margin-top:10px;width:100%;padding:9px;background:var(--blue-light);color:var(--blue);border:1.5px dashed var(--blue-mid);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;">
+        + Add Another Time Slot (Afternoon / Evening)
+      </button>
       <div class="fr" style="margin-bottom:0">
         <label class="fl">Number of people</label>
         <input type="text" id="f-people" placeholder="Approx. count"/>
@@ -754,6 +764,66 @@ function submitForm(){
     btn.disabled=false;btn.textContent='Submit Request';
     alert('Something went wrong. Please try again or contact David on Telegram.');
   });
+}
+
+
+// ── DYNAMIC TIME SLOTS ────────────────────────────────
+let slotCount = 1;
+
+function addTimeSlot() {
+  slotCount++;
+  const labels = {2: "🌤 Time Slot 2 — Afternoon", 3: "🌙 Time Slot 3 — Evening"};
+  const label = labels[slotCount] || ("⏰ Time Slot " + slotCount);
+
+  const container = document.getElementById('time-slots-container');
+  const div = document.createElement('div');
+  div.className = 'time-slot';
+  div.id = 'slot-' + slotCount;
+  div.style.marginTop = '10px';
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:12px;font-weight:600;color:var(--blue);">${label}</span>
+      <button type="button" onclick="removeSlot(${slotCount})" style="background:none;border:none;color:#e94560;font-size:12px;font-weight:600;cursor:pointer;">✕ Remove</button>
+    </div>
+    <div class="tc">
+      <div class="fr" style="margin-bottom:0">
+        <label class="fl">Start time</label>
+        <input type="time" id="f-time-start-${slotCount}"/>
+      </div>
+      <div class="fr" style="margin-bottom:0">
+        <label class="fl">End time</label>
+        <input type="time" id="f-time-end-${slotCount}"/>
+      </div>
+    </div>`;
+  container.appendChild(div);
+
+  // Hide button after 3 slots
+  if (slotCount >= 3) {
+    document.getElementById('add-slot-btn').style.display = 'none';
+  }
+}
+
+function removeSlot(n) {
+  const el = document.getElementById('slot-' + n);
+  if (el) el.remove();
+  document.getElementById('add-slot-btn').style.display = 'block';
+  slotCount = Math.max(1, slotCount - 1);
+}
+
+function getAllTimeSlots() {
+  const slots = [];
+  // Slot 1 (always present)
+  const s1 = document.getElementById('f-time-start') ? document.getElementById('f-time-start').value : '';
+  const e1 = document.getElementById('f-time-end') ? document.getElementById('f-time-end').value : '';
+  if (s1) slots.push(s1 + (e1 ? ' – ' + e1 : ''));
+
+  // Additional slots
+  for (let i = 2; i <= 3; i++) {
+    const s = document.getElementById('f-time-start-' + i);
+    const e = document.getElementById('f-time-end-' + i);
+    if (s && s.value) slots.push(s.value + (e && e.value ? ' – ' + e.value : ''));
+  }
+  return slots.join(' | ');
 }
 
 // ── REMEMBER CONTACT INFO ─────────────────────────────
