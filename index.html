@@ -184,6 +184,12 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
 </div>
 
 <div class="fw">
+  <!-- QUEUE LINK BANNER -->
+  <div style="background:rgba(10,30,60,.6);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="color:rgba(255,255,255,.8);font-size:12px;font-weight:600;">&#x2702;&#xFE0F; Wondering if the team is free? Check the editing queue before submitting.</div>
+    <a href="https://davidngoun-art.github.io/aii-editing-queue/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;text-decoration:none;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.3);white-space:nowrap;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">&#x1F4CB; View Current Workload &#x2192;</a>
+  </div>
+
   <!-- HEADER -->
   <div class="fh">
     <div class="fh-top">
@@ -328,7 +334,8 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
       <div class="tc">
         <div class="fr">
           <label class="fl">Start date <span class="req">*</span></label>
-          <input type="date" id="f-date-start"/>
+          <input type="date" id="f-date-start" onchange="checkDeadlineDate(this.value,'shoot')"/>
+          <div id="shoot-date-warn" style="display:none;margin-top:6px;padding:8px 12px;background:#fef0f3;border:1.5px solid #f9c0cc;border-radius:9px;font-size:11px;color:#e94560;font-weight:600;line-height:1.5;"></div>
         </div>
         <div class="fr">
           <label class="fl">End date</label>
@@ -378,6 +385,7 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
   <!-- TEAM -->
   <div class="sc">
     <div class="sl">Choose your production team</div>
+    <div id="workload-warning" style="display:none;background:#fff9e0;border:1.5px solid #f0c070;border-radius:10px;padding:11px 14px;font-size:12px;color:#8a6500;margin-bottom:14px;line-height:1.7;"></div>
     <div class="team-intro">Tap a profile to view details and select your preferred crew. You can choose one or both. Both David and Sitha are experienced in photography and videography. Final assignment depends on availability.</div>
     <div class="tg">
       <div class="tcard" id="card-david" onclick="openModal('david')">
@@ -474,7 +482,8 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
         <div class="fr" style="margin-bottom:0">
           <label class="fl">📅 Event deadline date <span class="req">*</span></label>
           <div class="info-note" style="margin-bottom:8px">When is your event or submission deadline? We'll make sure the video is ready before this date.</div>
-          <input type="date" id="f-event-deadline"/>
+          <input type="date" id="f-event-deadline" onchange="checkDeadlineDate(this.value,'edit')"/>
+          <div id="deadline-warn" style="display:none;margin-top:8px;padding:10px 13px;background:#fef0f3;border:1.5px solid #f9c0cc;border-radius:9px;font-size:12px;color:#e94560;font-weight:600;line-height:1.6;"></div>
         </div>
       </div>
     </div>
@@ -493,8 +502,9 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
   <div class="success-msg" id="success-msg">
     <div style="font-size:48px;margin-bottom:12px">✅</div>
     <h2>Request Submitted Successfully!</h2>
-    <p>Thank you! David and Sitha will review your request and get back to you soon.<br><br>
-    For urgent requests, contact us directly:<br><br>
+    <p>Thank you! David and Sitha will review your request and get back to you soon.</p>
+    <a href="https://davidngoun-art.github.io/aii-editing-queue/" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#e8f3fc;color:#1a4f80;font-size:13px;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:12px;border:1.5px solid #b8d6ef;margin:14px 0;width:100%;justify-content:center;">&#x1F4CB; Track your place in the editing queue &#x2192;</a>
+    <p style="color:var(--text);font-size:14px;line-height:1.8;">For urgent requests, contact us directly:<br><br>
     <strong>David Ngoun</strong><br>
     <a href="https://t.me/davidngoun168" target="_blank">✈ Telegram: @davidngoun168</a><br>
     <a href="mailto:david.ngoun@aii.edu.kh">✉ david.ngoun@aii.edu.kh</a><br><br>
@@ -579,6 +589,7 @@ timeSlots.push({start:'', end:''});
 window.addEventListener('DOMContentLoaded', function() {
   renderTimeSlots();
   loadRemembered();
+  checkWorkloadWarning();
 });
 
 // ── SHOOT TYPE ────────────────────────────────────────────
@@ -757,6 +768,16 @@ function submitForm() {
   if(shootType === 'video' && !getRadio('editing')) {
     alert('Please indicate if video editing is required.'); return;
   }
+  // Deadline too soon check
+  const deadlineToCheck = shootType === 'edit' ? getVal('f-event-deadline') : getVal('f-date-start');
+  if (shootType !== 'photo' && deadlineToCheck && isDeadlineTooSoon(deadlineToCheck)) {
+    const today   = new Date();
+    const minDate = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const minStr  = months[minDate.getMonth()] + ' ' + minDate.getDate() + ', ' + minDate.getFullYear();
+    alert('⚠️ Deadline too soon!\n\nWe require at least 2 weeks to prepare.\nEarliest accepted date: ' + minStr + '\n\nPlease choose a later date.');
+    return;
+  }
 
   const team = [];
   if(sel.david) team.push('David Ngoun');
@@ -811,6 +832,33 @@ function submitForm() {
 
   fetch(SHEET_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(() => {
+    // Auto-add to editing queue for Video and Editing Only requests
+    if (shootType === 'video' || shootType === 'edit') {
+      try {
+        const QKEY = 'aii_edit_queue_v2';
+        const q = JSON.parse(localStorage.getItem(QKEY) || '[]');
+        const person = teamVal === 'Sitha Eang' ? 'sitha' : 'david';
+        // If both, add to both
+        const assignees = teamVal === 'Both' ? ['david','sitha'] : [person];
+        assignees.forEach(who => {
+          q.push({
+            id: Date.now().toString() + Math.random().toString(36).slice(2,6),
+            requester: name,
+            projectName: title,
+            name: name + ' — ' + title,
+            person: who,
+            source: shootType === 'edit' ? 'edit' : 'video',
+            deadline: shootType === 'edit' ? getVal('f-event-deadline') : getVal('f-date-start'),
+            dept: dept,
+            status: 'idle',
+            pct: 0,
+            manual: false,
+            addedAt: new Date().toISOString()
+          });
+        });
+        localStorage.setItem(QKEY, JSON.stringify(q));
+      } catch(qErr) { console.log('Queue add error:', qErr); }
+    }
     document.getElementById('spinner').style.display='none';
     document.getElementById('success-msg').style.display='block';
     btn.style.display='none';
@@ -822,6 +870,76 @@ function submitForm() {
     alert('Something went wrong. Please try again or contact David on Telegram.');
   });
 }
+
+// ── DEADLINE VALIDATION ───────────────────────────────────
+function checkDeadlineDate(val, type) {
+  if (!val) return;
+  const today    = new Date();
+  today.setHours(0, 0, 0, 0);
+  const chosen   = new Date(val);
+  const diffDays = Math.round((chosen - today) / (24 * 60 * 60 * 1000));
+  const minDays  = 14; // 2 weeks minimum for all projects
+
+  const warnId = type === 'edit' ? 'deadline-warn' : 'shoot-date-warn';
+  const el = document.getElementById(warnId);
+  if (!el) return;
+
+  if (diffDays < minDays) {
+    const minDate = new Date(today.getTime() + minDays * 24 * 60 * 60 * 1000);
+    const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const minStr  = months[minDate.getMonth()] + ' ' + minDate.getDate() + ', ' + minDate.getFullYear();
+    el.style.display = 'block';
+    el.innerHTML = '⚠️ This date is too soon! We need at least <strong>2 weeks</strong> to prepare.<br>'
+      + 'Earliest accepted date: <strong>' + minStr + '</strong>';
+  } else if (diffDays < 21) {
+    el.style.display = 'block';
+    el.style.background = '#fff9e0';
+    el.style.borderColor = '#f0c070';
+    el.style.color = '#8a6500';
+    el.innerHTML = '⏰ <strong>Note:</strong> This is a tight deadline (' + diffDays + ' days). We will do our best but please allow more time if possible.';
+  } else {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  }
+}
+
+// ── WORKLOAD WARNING ──────────────────────────────────────
+function checkWorkloadWarning() {
+  try {
+    const QKEY = 'aii_edit_queue_v2';
+    const q    = JSON.parse(localStorage.getItem(QKEY) || '[]');
+    const el   = document.getElementById('workload-warning');
+    if (!el) return;
+
+    const davidActive = q.filter(p => p.person === 'david' && p.status !== 'done').length;
+    const sithaActive = q.filter(p => p.person === 'sitha' && p.status !== 'done').length;
+    const LIMIT = 5;
+
+    let warnings = [];
+    if (davidActive >= LIMIT) warnings.push('📋 <strong>David</strong> currently has <strong>' + davidActive + ' active projects</strong> in queue.');
+    if (sithaActive >= LIMIT) warnings.push('📋 <strong>Sitha</strong> currently has <strong>' + sithaActive + ' active projects</strong> in queue.');
+
+    if (warnings.length > 0) {
+      el.style.display = 'block';
+      el.innerHTML = '⚠️ <strong>Team is quite busy right now!</strong><br>'
+        + warnings.join('<br>')
+        + '<br>Please allow extra time or <a href="https://davidngoun-art.github.io/aii-editing-queue/" target="_blank" style="color:#8a6500;font-weight:700;">check the queue</a> before submitting.';
+    } else {
+      el.style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+// ── DEADLINE BLOCK ON SUBMIT ──────────────────────────────
+function isDeadlineTooSoon(dateStr) {
+  if (!dateStr || dateStr === 'N/A') return false;
+  const today   = new Date();
+  today.setHours(0, 0, 0, 0);
+  const chosen  = new Date(dateStr);
+  const diff    = Math.round((chosen - today) / (24 * 60 * 60 * 1000));
+  return diff < 14;
+}
+
 </script>
 </body>
 </html>
