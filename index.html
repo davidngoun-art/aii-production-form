@@ -49,6 +49,7 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
 .stype-card.sel-photo{border-color:#e94560;background:#fef0f3;transform:translateY(-2px);box-shadow:0 6px 18px rgba(233,69,96,.2);}
 .stype-card.sel-video{border-color:var(--blue);background:var(--blue-light);transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,103,160,.2);}
 .stype-card.sel-edit{border-color:#854f0b;background:#faeeda;transform:translateY(-2px);box-shadow:0 6px 18px rgba(133,79,11,.2);}
+.combo-error{font-size:12px;color:#e94560;font-weight:600;text-align:center;margin-top:6px;min-height:16px;}
 .stype-emoji{font-size:32px;margin-bottom:8px;display:block;transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
 .stype-card.sel-photo .stype-emoji,.stype-card.sel-video .stype-emoji,.stype-card.sel-edit .stype-emoji{transform:scale(1.15);}
 .stype-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
@@ -190,6 +191,12 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
     <a href="https://davidngoun-art.github.io/aii-editing-queue/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;text-decoration:none;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.3);white-space:nowrap;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">&#x1F4CB; View Current Workload &#x2192;</a>
   </div>
 
+  <!-- CALENDAR BANNER -->
+  <div style="background:rgba(10,30,60,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="color:rgba(255,255,255,.8);font-size:12px;font-weight:600;">&#x1F4C5; Want to check if we are free for your shoot date?</div>
+    <a href="https://calendar.google.com/calendar/embed?src=c_c2231d570d22d7b21a39f3d6c2d287c92205bde9fd5d7d80affb65f7730ec8da%40group.calendar.google.com&ctz=Asia%2FBangkok" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;text-decoration:none;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.3);white-space:nowrap;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">&#x1F4C6; View Shoot Schedule &#x2192;</a>
+  </div>
+
   <!-- HEADER -->
   <div class="fh">
     <div class="fh-top">
@@ -262,6 +269,7 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
         </div>
       </div>
       <div class="shoot-type-hint" id="stype-hint" style="color:var(--text-muted);">Please select the type of service you need</div>
+      <div class="combo-error" id="combo-error"></div>
     </div>
 
     <div class="fr">
@@ -334,8 +342,7 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
       <div class="tc">
         <div class="fr">
           <label class="fl">Start date <span class="req">*</span></label>
-          <input type="date" id="f-date-start" onchange="checkDeadlineDate(this.value,'shoot')"/>
-          <div id="shoot-date-warn" style="display:none;margin-top:6px;padding:8px 12px;background:#fef0f3;border:1.5px solid #f9c0cc;border-radius:9px;font-size:11px;color:#e94560;font-weight:600;line-height:1.5;"></div>
+          <input type="date" id="f-date-start"/>
         </div>
         <div class="fr">
           <label class="fl">End date</label>
@@ -482,7 +489,7 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
         <div class="fr" style="margin-bottom:0">
           <label class="fl">📅 Event deadline date <span class="req">*</span></label>
           <div class="info-note" style="margin-bottom:8px">When is your event or submission deadline? We'll make sure the video is ready before this date.</div>
-          <input type="date" id="f-event-deadline" onchange="checkDeadlineDate(this.value,'edit')"/>
+          <input type="date" id="f-event-deadline" onchange="checkDeadlineDate(this.value)"/>
           <div id="deadline-warn" style="display:none;margin-top:8px;padding:10px 13px;background:#fef0f3;border:1.5px solid #f9c0cc;border-radius:9px;font-size:12px;color:#e94560;font-weight:600;line-height:1.6;"></div>
         </div>
       </div>
@@ -593,43 +600,114 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── SHOOT TYPE ────────────────────────────────────────────
+// ── MULTI-SELECT SERVICE TYPE ─────────────────────────────
+// Allowed combos: photo | video | edit | photo+video | video+edit
+const selectedTypes = {photo:false, video:false, edit:false};
+
 function selectShootType(type) {
-  shootType = type;
-  ['photo','video','edit'].forEach(t => {
-    document.getElementById('stype-'+t).className = 'stype-card';
-  });
-  document.getElementById('stype-'+type).classList.add('sel-'+type);
+  // Toggle clicked type
+  selectedTypes[type] = !selectedTypes[type];
 
-  const hintColors = {photo:'color:#e94560',video:'color:var(--blue)',edit:'color:#854f0b'};
-  const hints = {photo:'📸 Photography selected',video:'🎬 Videography selected',edit:'✂️ Editing Only selected'};
+  // Enforce allowed combos — block invalid ones
+  const comboErr = document.getElementById('combo-error');
+  comboErr.textContent = '';
+
+  // If edit is selected, photo cannot be selected (no photo+edit combo)
+  if (selectedTypes.edit && selectedTypes.photo) {
+    if (type === 'edit') { selectedTypes.photo = false; }
+    else { selectedTypes.edit = false; }
+    comboErr.textContent = '⚠️ Photo + Editing Only is not a valid combo. Choose Photo+Video or Video+Edit.';
+  }
+  // Max 2 selections
+  const count = Object.values(selectedTypes).filter(Boolean).length;
+  if (count > 2) {
+    selectedTypes[type] = false;
+    comboErr.textContent = '⚠️ Maximum 2 services can be selected at once.';
+  }
+
+  // Update card styles
+  document.getElementById('stype-photo').className = 'stype-card' + (selectedTypes.photo ? ' sel-photo' : '');
+  document.getElementById('stype-video').className = 'stype-card' + (selectedTypes.video ? ' sel-video' : '');
+  document.getElementById('stype-edit').className  = 'stype-card' + (selectedTypes.edit  ? ' sel-edit'  : '');
+
+  // Build hint text
   const hintEl = document.getElementById('stype-hint');
-  hintEl.textContent = hints[type];
-  hintEl.style.cssText = hintColors[type];
+  const active = [];
+  if (selectedTypes.photo) active.push('📸 Photography');
+  if (selectedTypes.video) active.push('🎬 Videography');
+  if (selectedTypes.edit)  active.push('✂️ Editing Only');
 
-  const shootSec    = document.getElementById('section-shoot');
-  const photoSec    = document.getElementById('section-photo-needs');
-  const videoSec    = document.getElementById('section-video-needs');
-  const postSec     = document.getElementById('section-post');
-  const editBlock   = document.getElementById('edit-only-block');
-  const editReqBlk  = document.getElementById('editing-required-block');
+  if (active.length === 0) {
+    hintEl.textContent = 'Please select the type of service you need';
+    hintEl.style.cssText = 'color:var(--text-muted)';
+  } else {
+    hintEl.textContent = active.join(' + ') + ' selected';
+    hintEl.style.cssText = 'color:var(--blue-dark);font-weight:700';
+  }
+
+  // Derive shootType for backwards compat with rest of form
+  // photo only, video only, edit only, photo+video, video+edit
+  if (selectedTypes.photo && selectedTypes.video) shootType = 'photo+video';
+  else if (selectedTypes.video && selectedTypes.edit) shootType = 'video+edit';
+  else if (selectedTypes.photo) shootType = 'photo';
+  else if (selectedTypes.video) shootType = 'video';
+  else if (selectedTypes.edit)  shootType = 'edit';
+  else shootType = null;
+
+  updateFormSections();
+}
+
+function updateFormSections() {
+  const shootSec  = document.getElementById('section-shoot');
+  const photoSec  = document.getElementById('section-photo-needs');
+  const videoSec  = document.getElementById('section-video-needs');
+  const postSec   = document.getElementById('section-post');
+  const editBlock = document.getElementById('edit-only-block');
+  const editReqBlk= document.getElementById('editing-required-block');
   const deadlineBlk = document.getElementById('event-deadline-block');
 
-  if (type === 'photo') {
-    shootSec.classList.remove('hide'); photoSec.classList.remove('hide');
-    videoSec.classList.add('hide'); postSec.classList.add('hide');
-    editBlock.classList.add('hidden'); editReqBlk.classList.remove('hidden'); deadlineBlk.classList.add('hidden');
-    document.getElementById('submit-btn').textContent = '📸 Submit Photography Request';
-  } else if (type === 'video') {
-    shootSec.classList.remove('hide'); photoSec.classList.add('hide');
-    videoSec.classList.remove('hide'); postSec.classList.remove('hide');
-    editBlock.classList.add('hidden'); editReqBlk.classList.remove('hidden'); deadlineBlk.classList.add('hidden');
-    document.getElementById('submit-btn').textContent = '🎬 Submit Videography Request';
+  const hasPhoto = selectedTypes.photo;
+  const hasVideo = selectedTypes.video;
+  const hasEdit  = selectedTypes.edit;
+  const hasShoot = hasPhoto || hasVideo;
+
+  // Shoot details section
+  if (hasShoot) shootSec.classList.remove('hide');
+  else shootSec.classList.add('hide');
+
+  // Photo needs
+  if (hasPhoto) photoSec.classList.remove('hide');
+  else photoSec.classList.add('hide');
+
+  // Video needs
+  if (hasVideo) videoSec.classList.remove('hide');
+  else videoSec.classList.add('hide');
+
+  // Post production
+  if (hasVideo || hasEdit) postSec.classList.remove('hide');
+  else postSec.classList.add('hide');
+
+  // Edit-only block (footage link etc)
+  if (hasEdit && !hasVideo) {
+    editBlock.classList.remove('hidden');
+    deadlineBlk.classList.remove('hidden');
   } else {
-    shootSec.classList.add('hide'); photoSec.classList.add('hide');
-    videoSec.classList.add('hide'); postSec.classList.remove('hide');
-    editBlock.classList.remove('hidden'); editReqBlk.classList.add('hidden'); deadlineBlk.classList.remove('hidden');
-    document.getElementById('submit-btn').textContent = '✂️ Submit Editing Request';
+    editBlock.classList.add('hidden');
+    deadlineBlk.classList.add('hidden');
   }
+
+  // Editing required radio
+  if (hasVideo) editReqBlk.classList.remove('hidden');
+  else editReqBlk.classList.add('hidden');
+
+  // Submit button text
+  const btn = document.getElementById('submit-btn');
+  if (!shootType) btn.textContent = 'Submit Request';
+  else if (shootType === 'photo+video') btn.textContent = '📸🎬 Submit Photo & Video Request';
+  else if (shootType === 'video+edit')  btn.textContent = '🎬✂️ Submit Video & Editing Request';
+  else if (shootType === 'photo')       btn.textContent = '📸 Submit Photography Request';
+  else if (shootType === 'video')       btn.textContent = '🎬 Submit Videography Request';
+  else                                   btn.textContent = '✂️ Submit Editing Request';
 }
 
 // ── TEAM MODAL ────────────────────────────────────────────
@@ -750,33 +828,37 @@ function submitForm() {
   if(!name)      { alert('Please enter your full name.'); return; }
   if(!position)  { alert('Please enter your position.'); return; }
   if(!email)     { alert('Please enter your email.'); return; }
-  if(!shootType) { alert('Please select the type of service — Photography, Videography, or Editing Only.'); return; }
+  if(!shootType) { alert('Please select at least one service type.'); return; }
   if(!title)     { alert('Please enter a project title.'); return; }
   if(!type)      { alert('Please select a project type.'); return; }
   if(!dept)      { alert('Please select your department.'); return; }
   if(!desc)      { alert('Please add a project description.'); return; }
 
-  if(shootType !== 'edit') {
+  const needsShoot = shootType !== 'edit';
+  const needsDeadline = shootType === 'edit' || shootType === 'video+edit';
+  if(needsShoot) {
     if(!campus2)  { alert('Please select the shoot campus/building.'); return; }
     if(!room)     { alert('Please enter the exact room or location.'); return; }
     if(!dateStart){ alert('Please select a start date.'); return; }
     if(!allTimes) { alert('Please enter at least a start time for the first time slot.'); return; }
   }
-  if(shootType === 'edit' && !getVal('f-event-deadline')) {
+  if(needsDeadline && !getVal('f-event-deadline')) {
     alert('Please provide the event deadline date.'); return;
   }
-  if(shootType === 'video' && !getRadio('editing')) {
+  if((shootType === 'video' || shootType === 'video+edit') && !getRadio('editing')) {
     alert('Please indicate if video editing is required.'); return;
   }
-  // Deadline too soon check
-  const deadlineToCheck = shootType === 'edit' ? getVal('f-event-deadline') : getVal('f-date-start');
-  if (shootType !== 'photo' && deadlineToCheck && isDeadlineTooSoon(deadlineToCheck)) {
-    const today   = new Date();
-    const minDate = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
-    const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const minStr  = months[minDate.getMonth()] + ' ' + minDate.getDate() + ', ' + minDate.getFullYear();
-    alert('⚠️ Deadline too soon!\n\nWe require at least 2 weeks to prepare.\nEarliest accepted date: ' + minStr + '\n\nPlease choose a later date.');
-    return;
+  // Deadline too soon check — Editing Only requests only
+  if (shootType === 'edit') {
+    const editDeadline = getVal('f-event-deadline');
+    if (editDeadline && isDeadlineTooSoon(editDeadline)) {
+      const today   = new Date();
+      const minDate = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const minStr  = months[minDate.getMonth()] + ' ' + minDate.getDate() + ', ' + minDate.getFullYear();
+      alert('⚠️ Editing deadline too soon!\n\nWe need at least 2 weeks for video editing.\nEarliest accepted date: ' + minStr + '\n\nPlease choose a later date.');
+      return;
+    }
   }
 
   const team = [];
@@ -794,23 +876,27 @@ function submitForm() {
   const pnList = Object.keys(photoNeeds).filter(k=>photoNeeds[k])
     .map(k=>k==='other'?(getVal('f-pn-other')||'Other'):k).join(', ')||'';
 
-  const coverageMap = {photo:'Photography', video:'Videography', edit:'Editing Only'};
+  // coverageMap replaced by inline logic above
 
   const data = {
     timestamp:      new Date().toLocaleString(),
     name, position, email, phone: getVal('f-phone'),
-    coverageType:   coverageMap[shootType],
+    coverageType:   shootType === 'photo+video' ? 'Photography & Videography'
+                  : shootType === 'video+edit' ? 'Videography & Editing'
+                  : shootType === 'photo' ? 'Photography'
+                  : shootType === 'video' ? 'Videography'
+                  : 'Editing Only',
     projectTitle:   title,
     projectType:    getVal('f-type')==='other' ? getVal('f-type-other') : type,
     department:     dept,
     description:    desc,
     scriptLink:     getVal('f-script'),
-    shootCampus:    shootType!=='edit' ? (getVal('f-campus2')==='other' ? getVal('f-campus2-other') : campus2) : 'N/A',
-    room:           shootType!=='edit' ? room : 'N/A',
-    startDate:      shootType!=='edit' ? dateStart : 'N/A',
-    endDate:        shootType!=='edit' ? getVal('f-date-end') : 'N/A',
-    allTimeSlots:   shootType!=='edit' ? allTimes : 'N/A',
-    numberOfPeople: shootType!=='edit' ? getVal('f-people') : 'N/A',
+    shootCampus:    needsShoot ? (getVal('f-campus2')==='other' ? getVal('f-campus2-other') : campus2) : 'N/A',
+    room:           needsShoot ? room : 'N/A',
+    startDate:      needsShoot ? dateStart : 'N/A',
+    endDate:        needsShoot ? getVal('f-date-end') : 'N/A',
+    allTimeSlots:   needsShoot ? allTimes : 'N/A',
+    numberOfPeople: needsShoot ? getVal('f-people') : 'N/A',
     teamRequested:  teamVal,
     photoType:      pnList,
     photoEditing:   getRadio('photo-edit'),
@@ -818,7 +904,7 @@ function submitForm() {
     styleReference: getVal('f-reference'),
     videoProductionNeeds: needsList.join(', ')||'None',
     cameraAngles:   getVal('f-angles'),
-    videoEditing:   shootType==='video' ? getRadio('editing') : (shootType==='edit' ? 'Yes — Editing Only' : 'N/A'),
+    videoEditing:   (shootType==='video'||shootType==='video+edit') ? getRadio('editing') : (shootType==='edit' ? 'Yes — Editing Only' : 'N/A'),
     subtitlesNeeded: getRadio('subs'),
     aspectRatio:    getSelectedAR(),
     eventDeadline:  getVal('f-event-deadline'),
@@ -833,12 +919,11 @@ function submitForm() {
   fetch(SHEET_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(() => {
     // Auto-add to editing queue for Video and Editing Only requests
-    if (shootType === 'video' || shootType === 'edit') {
+    if (shootType === 'video' || shootType === 'edit' || shootType === 'video+edit') {
       try {
         const QKEY = 'aii_edit_queue_v2';
         const q = JSON.parse(localStorage.getItem(QKEY) || '[]');
         const person = teamVal === 'Sitha Eang' ? 'sitha' : 'david';
-        // If both, add to both
         const assignees = teamVal === 'Both' ? ['david','sitha'] : [person];
         assignees.forEach(who => {
           q.push({
@@ -847,7 +932,7 @@ function submitForm() {
             projectName: title,
             name: name + ' — ' + title,
             person: who,
-            source: shootType === 'edit' ? 'edit' : 'video',
+            source: (shootType === 'video' || shootType === 'video+edit') ? 'video' : 'edit',
             deadline: shootType === 'edit' ? getVal('f-event-deadline') : getVal('f-date-start'),
             dept: dept,
             status: 'idle',
@@ -872,31 +957,32 @@ function submitForm() {
 }
 
 // ── DEADLINE VALIDATION ───────────────────────────────────
-function checkDeadlineDate(val, type) {
+function checkDeadlineDate(val) {
+  // Only applies to Editing Only requests
   if (!val) return;
+  const el = document.getElementById('deadline-warn');
+  if (!el) return;
   const today    = new Date();
   today.setHours(0, 0, 0, 0);
   const chosen   = new Date(val);
   const diffDays = Math.round((chosen - today) / (24 * 60 * 60 * 1000));
-  const minDays  = 14; // 2 weeks minimum for all projects
-
-  const warnId = type === 'edit' ? 'deadline-warn' : 'shoot-date-warn';
-  const el = document.getElementById(warnId);
-  if (!el) return;
+  const minDays  = 14;
 
   if (diffDays < minDays) {
     const minDate = new Date(today.getTime() + minDays * 24 * 60 * 60 * 1000);
     const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const minStr  = months[minDate.getMonth()] + ' ' + minDate.getDate() + ', ' + minDate.getFullYear();
     el.style.display = 'block';
-    el.innerHTML = '⚠️ This date is too soon! We need at least <strong>2 weeks</strong> to prepare.<br>'
-      + 'Earliest accepted date: <strong>' + minStr + '</strong>';
+    el.style.background = '#fef0f3';
+    el.style.borderColor = '#f9c0cc';
+    el.style.color = '#e94560';
+    el.innerHTML = '⚠️ Editing deadline too soon! We need at least <strong>2 weeks</strong>.<br>Earliest date: <strong>' + minStr + '</strong>';
   } else if (diffDays < 21) {
     el.style.display = 'block';
     el.style.background = '#fff9e0';
     el.style.borderColor = '#f0c070';
     el.style.color = '#8a6500';
-    el.innerHTML = '⏰ <strong>Note:</strong> This is a tight deadline (' + diffDays + ' days). We will do our best but please allow more time if possible.';
+    el.innerHTML = '⏰ Tight deadline (' + diffDays + ' days). We will do our best!';
   } else {
     el.style.display = 'none';
     el.innerHTML = '';
