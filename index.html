@@ -42,13 +42,14 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
 @media(max-width:480px){.tc{grid-template-columns:1fr;}}
 
 /* SHOOT TYPE */
-.shoot-type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:4px;}
-@media(max-width:480px){.shoot-type-grid{grid-template-columns:1fr;}}
+.shoot-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;}
+@media(max-width:360px){.shoot-type-grid{grid-template-columns:1fr;}}
 .stype-card{border:2px solid var(--border);border-radius:14px;padding:1.2rem .8rem;cursor:pointer;text-align:center;transition:all .25s cubic-bezier(.34,1.56,.64,1);background:#fff;user-select:none;}
 .stype-card:hover{border-color:var(--blue);background:var(--blue-light);transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,103,160,.15);}
 .stype-card.sel-photo{border-color:#e94560;background:#fef0f3;transform:translateY(-2px);box-shadow:0 6px 18px rgba(233,69,96,.2);}
 .stype-card.sel-video{border-color:var(--blue);background:var(--blue-light);transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,103,160,.2);}
 .stype-card.sel-edit{border-color:#854f0b;background:#faeeda;transform:translateY(-2px);box-shadow:0 6px 18px rgba(133,79,11,.2);}
+.stype-card.sel-photo-edit{border-color:#7a60d0;background:#eeedfe;transform:translateY(-2px);box-shadow:0 6px 18px rgba(122,96,208,.2);}
 .combo-error{font-size:12px;color:#e94560;font-weight:600;text-align:center;margin-top:6px;min-height:16px;}
 .stype-emoji{font-size:32px;margin-bottom:8px;display:block;transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
 .stype-card.sel-photo .stype-emoji,.stype-card.sel-video .stype-emoji,.stype-card.sel-edit .stype-emoji{transform:scale(1.15);}
@@ -263,8 +264,14 @@ body{min-height:100vh;font-family:'Inter',sans-serif;color:var(--text);padding:1
         </div>
         <div class="stype-card" id="stype-edit" onclick="selectShootType('edit')">
           <span class="stype-emoji">✂️</span>
-          <div class="stype-title">Editing Only</div>
+          <div class="stype-title">Video Editing Only</div>
           <div class="stype-desc">Already have footage? We'll edit it for you</div>
+          <div class="stype-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        </div>
+        <div class="stype-card" id="stype-photo-edit" onclick="selectShootType('photo-edit')">
+          <span class="stype-emoji">🖼️</span>
+          <div class="stype-title">Photo Editing Only</div>
+          <div class="stype-desc">Already have photos? We'll edit them for you</div>
           <div class="stype-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
         </div>
       </div>
@@ -602,21 +609,27 @@ window.addEventListener('DOMContentLoaded', function() {
 // ── SHOOT TYPE ────────────────────────────────────────────
 // ── MULTI-SELECT SERVICE TYPE ─────────────────────────────
 // Allowed combos: photo | video | edit | photo+video | video+edit
-const selectedTypes = {photo:false, video:false, edit:false};
+const selectedTypes = {photo:false, video:false, edit:false, 'photo-edit':false};
 
 function selectShootType(type) {
   // Toggle clicked type
   selectedTypes[type] = !selectedTypes[type];
 
-  // Enforce allowed combos — block invalid ones
+  // Enforce allowed combos
+  // Allowed: photo | video | edit | photo-edit | photo+video | video+edit
+  // NOT allowed: edit+photo-edit, photo+edit, photo+photo-edit, video+photo-edit
   const comboErr = document.getElementById('combo-error');
   comboErr.textContent = '';
 
-  // If edit is selected, photo cannot be selected (no photo+edit combo)
-  if (selectedTypes.edit && selectedTypes.photo) {
-    if (type === 'edit') { selectedTypes.photo = false; }
-    else { selectedTypes.edit = false; }
-    comboErr.textContent = '⚠️ Photo + Editing Only is not a valid combo. Choose Photo+Video or Video+Edit.';
+  const invalid = [
+    selectedTypes.edit && selectedTypes.photo,
+    selectedTypes['photo-edit'] && selectedTypes.video,
+    selectedTypes['photo-edit'] && selectedTypes.edit,
+    selectedTypes['photo-edit'] && selectedTypes.photo,
+  ];
+  if (invalid.some(Boolean)) {
+    selectedTypes[type] = false;
+    comboErr.textContent = '⚠️ That combination is not available. Allowed: Photo+Video or Video+Edit only.';
   }
   // Max 2 selections
   const count = Object.values(selectedTypes).filter(Boolean).length;
@@ -626,16 +639,18 @@ function selectShootType(type) {
   }
 
   // Update card styles
-  document.getElementById('stype-photo').className = 'stype-card' + (selectedTypes.photo ? ' sel-photo' : '');
-  document.getElementById('stype-video').className = 'stype-card' + (selectedTypes.video ? ' sel-video' : '');
-  document.getElementById('stype-edit').className  = 'stype-card' + (selectedTypes.edit  ? ' sel-edit'  : '');
+  document.getElementById('stype-photo').className      = 'stype-card' + (selectedTypes.photo       ? ' sel-photo'      : '');
+  document.getElementById('stype-video').className      = 'stype-card' + (selectedTypes.video       ? ' sel-video'      : '');
+  document.getElementById('stype-edit').className       = 'stype-card' + (selectedTypes.edit        ? ' sel-edit'       : '');
+  document.getElementById('stype-photo-edit').className = 'stype-card' + (selectedTypes['photo-edit']? ' sel-photo-edit' : '');
 
   // Build hint text
   const hintEl = document.getElementById('stype-hint');
   const active = [];
-  if (selectedTypes.photo) active.push('📸 Photography');
-  if (selectedTypes.video) active.push('🎬 Videography');
-  if (selectedTypes.edit)  active.push('✂️ Editing Only');
+  if (selectedTypes.photo)        active.push('📸 Photography');
+  if (selectedTypes.video)        active.push('🎬 Videography');
+  if (selectedTypes.edit)         active.push('✂️ Video Editing Only');
+  if (selectedTypes['photo-edit'])active.push('🖼️ Photo Editing Only');
 
   if (active.length === 0) {
     hintEl.textContent = 'Please select the type of service you need';
@@ -647,11 +662,12 @@ function selectShootType(type) {
 
   // Derive shootType for backwards compat with rest of form
   // photo only, video only, edit only, photo+video, video+edit
-  if (selectedTypes.photo && selectedTypes.video) shootType = 'photo+video';
-  else if (selectedTypes.video && selectedTypes.edit) shootType = 'video+edit';
-  else if (selectedTypes.photo) shootType = 'photo';
-  else if (selectedTypes.video) shootType = 'video';
-  else if (selectedTypes.edit)  shootType = 'edit';
+  if (selectedTypes.photo && selectedTypes.video)       shootType = 'photo+video';
+  else if (selectedTypes.video && selectedTypes.edit)   shootType = 'video+edit';
+  else if (selectedTypes.photo)                         shootType = 'photo';
+  else if (selectedTypes.video)                         shootType = 'video';
+  else if (selectedTypes.edit)                          shootType = 'edit';
+  else if (selectedTypes['photo-edit'])                 shootType = 'photo-edit';
   else shootType = null;
 
   updateFormSections();
@@ -666,10 +682,12 @@ function updateFormSections() {
   const editReqBlk= document.getElementById('editing-required-block');
   const deadlineBlk = document.getElementById('event-deadline-block');
 
-  const hasPhoto = selectedTypes.photo;
-  const hasVideo = selectedTypes.video;
-  const hasEdit  = selectedTypes.edit;
-  const hasShoot = hasPhoto || hasVideo;
+  const hasPhoto     = selectedTypes.photo;
+  const hasVideo     = selectedTypes.video;
+  const hasEdit      = selectedTypes.edit;
+  const hasPhotoEdit = selectedTypes['photo-edit'];
+  const hasShoot     = hasPhoto || hasVideo;
+  const hasAnyEdit   = hasEdit || hasPhotoEdit;
 
   // Shoot details section
   if (hasShoot) shootSec.classList.remove('hide');
@@ -683,12 +701,12 @@ function updateFormSections() {
   if (hasVideo) videoSec.classList.remove('hide');
   else videoSec.classList.add('hide');
 
-  // Post production
+  // Post production (video or video editing)
   if (hasVideo || hasEdit) postSec.classList.remove('hide');
   else postSec.classList.add('hide');
 
-  // Edit-only block (footage link etc)
-  if (hasEdit && !hasVideo) {
+  // Edit-only block (footage link + deadline)
+  if (hasAnyEdit && !hasVideo) {
     editBlock.classList.remove('hidden');
     deadlineBlk.classList.remove('hidden');
   } else {
@@ -702,12 +720,13 @@ function updateFormSections() {
 
   // Submit button text
   const btn = document.getElementById('submit-btn');
-  if (!shootType) btn.textContent = 'Submit Request';
-  else if (shootType === 'photo+video') btn.textContent = '📸🎬 Submit Photo & Video Request';
-  else if (shootType === 'video+edit')  btn.textContent = '🎬✂️ Submit Video & Editing Request';
-  else if (shootType === 'photo')       btn.textContent = '📸 Submit Photography Request';
-  else if (shootType === 'video')       btn.textContent = '🎬 Submit Videography Request';
-  else                                   btn.textContent = '✂️ Submit Editing Request';
+  if (!shootType)                        btn.textContent = 'Submit Request';
+  else if (shootType === 'photo+video')  btn.textContent = '📸🎬 Submit Photo & Video Request';
+  else if (shootType === 'video+edit')   btn.textContent = '🎬✂️ Submit Video & Editing Request';
+  else if (shootType === 'photo')        btn.textContent = '📸 Submit Photography Request';
+  else if (shootType === 'video')        btn.textContent = '🎬 Submit Videography Request';
+  else if (shootType === 'photo-edit')   btn.textContent = '🖼️ Submit Photo Editing Request';
+  else                                    btn.textContent = '✂️ Submit Video Editing Request';
 }
 
 // ── TEAM MODAL ────────────────────────────────────────────
@@ -834,7 +853,7 @@ function submitForm() {
   if(!dept)      { alert('Please select your department.'); return; }
   if(!desc)      { alert('Please add a project description.'); return; }
 
-  const needsShoot = shootType !== 'edit';
+  const needsShoot = shootType !== 'edit' && shootType !== 'photo-edit';
   const needsDeadline = shootType === 'edit' || shootType === 'video+edit';
   if(needsShoot) {
     if(!campus2)  { alert('Please select the shoot campus/building.'); return; }
@@ -849,7 +868,7 @@ function submitForm() {
     alert('Please indicate if video editing is required.'); return;
   }
   // Deadline too soon check — Editing Only requests only
-  if (shootType === 'edit') {
+  if (shootType === 'edit' || shootType === 'photo-edit') {
     const editDeadline = getVal('f-event-deadline');
     if (editDeadline && isDeadlineTooSoon(editDeadline)) {
       const today   = new Date();
@@ -881,11 +900,12 @@ function submitForm() {
   const data = {
     timestamp:      new Date().toLocaleString(),
     name, position, email, phone: getVal('f-phone'),
-    coverageType:   shootType === 'photo+video' ? 'Photography & Videography'
-                  : shootType === 'video+edit' ? 'Videography & Editing'
-                  : shootType === 'photo' ? 'Photography'
-                  : shootType === 'video' ? 'Videography'
-                  : 'Editing Only',
+    coverageType:   shootType === 'photo+video'  ? 'Photography & Videography'
+                  : shootType === 'video+edit'  ? 'Videography & Editing'
+                  : shootType === 'photo'        ? 'Photography'
+                  : shootType === 'video'        ? 'Videography'
+                  : shootType === 'photo-edit'   ? 'Photo Editing Only'
+                  : 'Video Editing Only',
     projectTitle:   title,
     projectType:    getVal('f-type')==='other' ? getVal('f-type-other') : type,
     department:     dept,
@@ -919,7 +939,7 @@ function submitForm() {
   fetch(SHEET_URL, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(() => {
     // Auto-add to editing queue for Video and Editing Only requests
-    if (shootType === 'video' || shootType === 'edit' || shootType === 'video+edit') {
+    if (shootType === 'video' || shootType === 'edit' || shootType === 'video+edit' || shootType === 'photo-edit') {
       try {
         const QKEY = 'aii_edit_queue_v2';
         const q = JSON.parse(localStorage.getItem(QKEY) || '[]');
@@ -932,7 +952,8 @@ function submitForm() {
             projectName: title,
             name: name + ' — ' + title,
             person: who,
-            source: (shootType === 'video' || shootType === 'video+edit') ? 'video' : 'edit',
+            source: (shootType === 'video' || shootType === 'video+edit') ? 'video'
+                     : shootType === 'photo-edit' ? 'photo-edit' : 'edit',
             deadline: shootType === 'edit' ? getVal('f-event-deadline') : getVal('f-date-start'),
             dept: dept,
             status: 'idle',
